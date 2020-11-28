@@ -2,7 +2,7 @@
 
 namespace Client_App
 {
-    class Program
+    class Client
     {
         static void Main(string[] args)
         {
