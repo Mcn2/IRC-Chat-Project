@@ -37,7 +37,7 @@ namespace Server_App
                     TcpClient Client = Listener.AcceptTcpClient();
                     Console.WriteLine("Connected!");
 
-                    data = null;
+                    data = "";
 
                     NetworkStream stream = Client.GetStream();
 
@@ -45,16 +45,17 @@ namespace Server_App
 
                     while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
                     {
-                        data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        Console.WriteLine("Message Recived: " + data);
-
-                        data = Chat.ParseMessage(data);
-
-                        byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
-
-                        stream.Write(msg, 0, msg.Length);
-                        Console.WriteLine("Sent: " + data);
+                        data = data + Encoding.ASCII.GetString(bytes, 0, i);
                     }
+                    Console.WriteLine("Message Recived: " + data);
+                    
+                    data = Chat.ParseMessage(data);
+                    
+                    byte[] msg = Encoding.ASCII.GetBytes(data);
+                    
+                    stream.Write(msg, 0, msg.Length);
+                    Console.WriteLine("Sent: " + data);
+                    
 
                     Client.Close();
                 }

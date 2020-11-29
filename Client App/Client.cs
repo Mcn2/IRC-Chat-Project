@@ -14,7 +14,7 @@ namespace Client_App
             while (true)
             {
                 TestMessage = Console.ReadLine();
-                Console.WriteLine(Chat.Network.Send(TestMessage));
+                Console.WriteLine("Returned: \n" + Chat.Network.Send(TestMessage));
             }
             
         }

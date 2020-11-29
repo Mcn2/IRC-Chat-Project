@@ -16,15 +16,15 @@ namespace Client_App
         {
             Console.Write(
                 "Command List:\n" +
-                "Connect to server         | /Connect IPAddress\n" +
+                "Connect to server         | /Connect\n" +
                 "List rooms                | /ListRooms\n" +
-                "Connect to room           | /Join RoomName\n" +
-                "Create new room           | /Create RoomName\n" +
-                "Leave a room              | /Leave RoomName\n" +
+                "Connect to room           | /Join\n" +
+                "Create new room           | /Create\n" +
+                "Leave a room              | /Leave\n" +
                 "View joined rooms         | /MyRooms\n" +
-                "View a room               | /View Roomname\n" +
-                "Message Multiple rooms    | /Multi-message Roomname1, Roomname2, Roomname3; Message\n" +
-                "View room members         | /MemberList Roomname\n" +
+                "View a room               | /View\n" +
+                "Message Multiple rooms    | /Multi-message\n" +
+                "View room members         | /MemberList\n" +
                 "Disconnect from a server  | /Disconnect\n" +
                 "Show Help (This Menu)     | /Help\n" +
                 "Close Program             | /Exit\n" +

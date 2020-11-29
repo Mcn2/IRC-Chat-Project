@@ -33,20 +33,27 @@ namespace Client_App
 
         public String Send(string Message)
         {
+            string responceData = "";
             try
             {
                 var client = new TcpClient(ServerIP, Port);
                 NetworkStream Stream = client.GetStream();
 
-                byte[] data = System.Text.Encoding.ASCII.GetBytes(Message);
+                byte[] data = Encoding.ASCII.GetBytes(Message);
                 Stream.Write(data, 0, data.Length);
                 //Console.WriteLine("Send message: " + Message);
 
                 data = new byte[256];
-                string responceData = String.Empty;
+                responceData = String.Empty;
 
-                Int32 bytes = Stream.Read(data, 0, data.Length);
-                responceData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
+                int i;
+                while ((i = Stream.Read(data, 0, data.Length)) != 0)
+                {
+                    responceData = responceData + Encoding.ASCII.GetString(data, 0, i);
+                }
+                
+                //int bytes = Stream.Read(data, 0, data.Length);
+                //responceData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
                 //Console.WriteLine("Recived Message: " + responceData);
 
                 Stream.Close();
@@ -61,9 +68,7 @@ namespace Client_App
                 Console.WriteLine("SocketException: {0}", e);
             }
 
-            Console.WriteLine("\nPress Enter to continue...");
-            Console.Read();
-            return "";
+            return responceData;
         }
     }
 }
