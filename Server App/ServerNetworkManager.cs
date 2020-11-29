@@ -12,6 +12,7 @@ namespace Server_App
         {
             Listener = new TcpListener(IPAddress.Any, Port);
             Listener.Start();
+            Chat = new ServerChatManager();
         }
 
         ~ServerNetworkManager()
@@ -21,6 +22,7 @@ namespace Server_App
 
         private TcpListener Listener;
         private readonly Int32 Port = 6667;
+        private ServerChatManager Chat;
 
         public int Run()
         {
@@ -46,7 +48,7 @@ namespace Server_App
                         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
                         Console.WriteLine("Message Recived: " + data);
 
-                        data = data.ToUpper() + "!";
+                        data = Chat.ParseMessage(data);
 
                         byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
 

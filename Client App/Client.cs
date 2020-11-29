@@ -7,10 +7,18 @@ namespace Client_App
     {
         static void Main(string[] args)
         {
-            ClientNetworkManager Network = new ClientNetworkManager();
-            while (!Network.ReadServerIP());
-
-            Network.Send("Test Message");
+            ClientChatManager Chat = new ClientChatManager();
+            while (!Chat.Network.ReadServerIP()) ;
+            string TestMessage;
+            
+            while (true)
+            {
+                TestMessage = Console.ReadLine();
+                Console.WriteLine(Chat.Network.Send(TestMessage));
+            }
+            
         }
+
+        
     }
 }

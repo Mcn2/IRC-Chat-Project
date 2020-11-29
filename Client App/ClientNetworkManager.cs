@@ -14,7 +14,7 @@ namespace Client_App
         public bool ReadServerIP()
         {
             string UserInput;
-            Console.WriteLine("Enter Server IP: ");
+            Console.WriteLine("Enter Server IP (If local, use 127.0.0.1): ");
             UserInput = Console.ReadLine();
             bool ValidateIp = IPAddress.TryParse(UserInput, out _);
             if (ValidateIp)
@@ -31,7 +31,7 @@ namespace Client_App
                 
         }
 
-        public int Send(string Message)
+        public String Send(string Message)
         {
             try
             {
@@ -40,14 +40,14 @@ namespace Client_App
 
                 byte[] data = System.Text.Encoding.ASCII.GetBytes(Message);
                 Stream.Write(data, 0, data.Length);
-                Console.WriteLine("Send message: " + Message);
+                //Console.WriteLine("Send message: " + Message);
 
                 data = new byte[256];
                 string responceData = String.Empty;
 
                 Int32 bytes = Stream.Read(data, 0, data.Length);
                 responceData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-                Console.WriteLine("Recived Message: " + responceData);
+                //Console.WriteLine("Recived Message: " + responceData);
 
                 Stream.Close();
                 client.Close();
@@ -63,7 +63,7 @@ namespace Client_App
 
             Console.WriteLine("\nPress Enter to continue...");
             Console.Read();
-            return 0;
+            return "";
         }
     }
 }
