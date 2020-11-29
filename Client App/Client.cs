@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace Client_App
 {
@@ -6,7 +7,10 @@ namespace Client_App
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            ClientNetworkManager Network = new ClientNetworkManager();
+            while (!Network.ReadServerIP());
+
+            Network.Send("Test Message");
         }
     }
 }
