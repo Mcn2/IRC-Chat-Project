@@ -11,7 +11,7 @@ namespace Server_App
         //CHLS | request a list of channels, no message needed, returns comma seperated list of channels
         //CRCH | Create a new channel, channel name in message, returns if the channel was created sucussfully
         //JNCH | Join a channel, channel name in message, returns channel chat history
-        //LVCH | Leave a channel, channel name in message, returns channel chat history
+        //LVCH | Leave a channel, channel name in message, if the user is no longer in the channel or if the channel dosn't exist
         //CHCH | Request channel chat history, channel name in message, returns channel chat history
         //MEMB | Requests a list of members in a channel, channel name in message, returns comma seperated list of members
         //PING | Checks if server is responding, no message required, returns "Hello Client!"
@@ -49,7 +49,7 @@ namespace Server_App
                 return "Message Not Accepted";
             }
 
-            if(UserID != 0 && !UserDict.ContainsKey(UserID))
+            if(Type != "PING" && UserID != 0 && !UserDict.ContainsKey(UserID))
             {
                 return "User ID not accepted, message not processed";
             }
@@ -168,6 +168,15 @@ namespace Server_App
                     return "Hello Client!";
                 case "MECH":
                     Console.WriteLine("Message Channel");
+                    String ChatMessage;
+                    String ChannelName;
+                    ChannelName = Message.Substring(0, Message.IndexOf(','));
+                    ChatMessage = Message.Substring(Message.IndexOf(',') + 1);
+                    if (!ChannelDict.ContainsKey(ChannelName))
+                    {
+                        return "Channel dosen't exist";
+                    }
+                    ChannelDict[ChannelName].Messages = ChannelDict[ChannelName].Messages + UserDict[UserID].Alias + ": " + ChatMessage + "\n";
                     break;
                 case "GBYE":
                     Console.WriteLine("Disconnect");

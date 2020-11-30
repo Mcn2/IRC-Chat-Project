@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.IO;
 
 namespace Server_App
 {
@@ -26,8 +27,8 @@ namespace Server_App
 
         public int Run()
         {
-            Byte[] bytes = new byte[256];
-            string data = null;
+            Byte[] bytes = new byte[1024];
+            string data;
             try
             {
                 while (true)
@@ -41,20 +42,18 @@ namespace Server_App
 
                     NetworkStream stream = Client.GetStream();
 
-                    int i;
+                    stream.Read(bytes, 0, bytes.Length);
+                    data = Encoding.ASCII.GetString(bytes, 0, bytes.Length);
+                    
 
-                    while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
-                    {
-                        data = data + Encoding.ASCII.GetString(bytes, 0, i);
-                    }
-                    Console.WriteLine("Message Recived: " + data);
+                    Console.WriteLine("Message Recived: " + data.TrimEnd(new char[] { (char)0 }));
                     
-                    data = Chat.ParseMessage(data);
+                    data = Chat.ParseMessage(data.TrimEnd(new char[] { (char)0 }));
                     
-                    byte[] msg = Encoding.ASCII.GetBytes(data);
+                    bytes = Encoding.ASCII.GetBytes(data.TrimEnd(new char[] { (char)0 }));
                     
-                    stream.Write(msg, 0, msg.Length);
-                    Console.WriteLine("Sent: " + data);
+                    stream.Write(bytes, 0, bytes.Length);
+                    Console.WriteLine("Sent: " + data.TrimEnd(new char[] { (char)0 }));
                     
 
                     Client.Close();

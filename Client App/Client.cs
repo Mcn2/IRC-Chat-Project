@@ -8,14 +8,7 @@ namespace Client_App
         static void Main(string[] args)
         {
             ClientChatManager Chat = new ClientChatManager();
-            while (!Chat.Network.ReadServerIP()) ;
-            string TestMessage;
-            
-            while (true)
-            {
-                TestMessage = Console.ReadLine();
-                Console.WriteLine("Returned: \n" + Chat.Network.Send(TestMessage));
-            }
+            Chat.Run();
             
         }
 
