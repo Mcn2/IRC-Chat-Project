@@ -119,13 +119,27 @@ namespace Client_App
                             JoinRoom(Console.ReadLine().Trim());
                             break;
                         case "/Create":
+                            bool Valid = false;
                             Console.Clear();
-                            Console.Write("Enter the name of the new room: ");
-                            String RoomName = Console.ReadLine().Trim();
-                            if (CreateRoom(RoomName))
+                            while(!Valid)
                             {
-                                JoinRoom(RoomName);
+                                Console.Write("Enter the name of the new room: ");
+                                String RoomName = Console.ReadLine().Trim();
+                                if(!RoomName.Contains(','))
+                                {
+                                    Valid = true;
+                                }else
+                                {
+                                    Console.WriteLine("Room name cannot contain commas");
+                                    Valid = false;
+                                }
+                            
+                                if (Valid && CreateRoom(RoomName))
+                                {
+                                   JoinRoom(RoomName);
+                                }
                             }
+                            
                             break;
                         case "/Leave":
                             Console.Clear();
