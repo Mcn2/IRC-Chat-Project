@@ -27,7 +27,7 @@ namespace Server_App
 
         public int Run()
         {
-            Byte[] bytes = new byte[1024];
+            Byte[] bytes;
             string data;
             try
             {
@@ -39,24 +39,27 @@ namespace Server_App
                     Console.WriteLine("Connected!");
 
                     data = "";
+                    bytes = new byte[1024];
 
                     NetworkStream stream = Client.GetStream();
 
                     stream.Read(bytes, 0, bytes.Length);
-                    data = Encoding.ASCII.GetString(bytes, 0, bytes.Length);
+                    data = Encoding.ASCII.GetString(bytes, 0, bytes.Length).TrimEnd(new char[] { (char)0 });
                     
 
-                    Console.WriteLine("Message Recived: " + data.TrimEnd(new char[] { (char)0 }));
+                    Console.WriteLine("Message Recived: " + data);
                     
-                    data = Chat.ParseMessage(data.TrimEnd(new char[] { (char)0 }));
+                    data = Chat.ParseMessage(data);
                     
-                    bytes = Encoding.ASCII.GetBytes(data.TrimEnd(new char[] { (char)0 }));
+                    bytes = Encoding.ASCII.GetBytes(data);
                     
                     stream.Write(bytes, 0, bytes.Length);
-                    Console.WriteLine("Sent: " + data.TrimEnd(new char[] { (char)0 }));
+                    Console.WriteLine("Sent: " + data);
                     
 
                     Client.Close();
+
+                    Chat.RemoveEmpty();
                 }
             }
             catch(SocketException e)

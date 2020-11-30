@@ -35,8 +35,7 @@ namespace Client_App
         public String Send(string Message)
         {
             string responceData = "";
-            try
-            {
+          
                 var client = new TcpClient(ServerIP, Port);
                 NetworkStream Stream = client.GetStream();
 
@@ -60,15 +59,7 @@ namespace Client_App
 
                 Stream.Close();
                 client.Close();
-            }
-            catch (ArgumentNullException e)
-            {
-                Console.WriteLine("ArgumentNullException: {0}", e);
-            }
-            catch (SocketException e)
-            {
-                Console.WriteLine("SocketException: {0}", e);
-            }
+                     
 
             return responceData;
         }

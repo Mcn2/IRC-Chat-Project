@@ -21,6 +21,19 @@ namespace Server_App
 
         private Dictionary<int, UserData> UserDict = new Dictionary<int, UserData>();
         private Dictionary<String, ChannelData> ChannelDict = new Dictionary<string, ChannelData>();
+
+        public void RemoveEmpty()
+        {
+            foreach (String Channel in ChannelDict.Keys)
+            {
+                if(ChannelDict[Channel].Members.Count == 0)
+                {
+                    ChannelDict.Remove(Channel);
+                    Console.WriteLine("Removed empty channel: " + Channel);
+                }
+            }
+            return;
+        }
         
 
         public string ParseMessage(string Message)
@@ -83,25 +96,33 @@ namespace Server_App
                     return output;
                 case "CRCH":
                     Console.WriteLine("Create Channel");
-                    if (ChannelDict.ContainsKey(Message.Trim()))
+                    if (ChannelDict.ContainsKey(Contents.Trim()))
                     {
                         return "Already Exists";
                     }
                     else
                     {
-                        ChannelDict.Add(Message.Trim(),
-                            new ChannelData(Message.Trim(),
-                            "Channel Started by " + UserDict[UserID].Alias + "\n",
-                            new List<int>(UserID)));
+                        ChannelDict.Add(Contents.Trim(),
+                            new ChannelData(Contents.Trim(),
+                            "Channel " + Contents.Trim() + " Started by " + UserDict[UserID].Alias + "\n",
+                            new List<int>()));
+                        ChannelDict[Contents.Trim()].Members.Add(UserID);
                         return "Channel Created";
                     }
                 case "JNCH":
                     Console.WriteLine("Join Channel");
-                    if (ChannelDict.ContainsKey(Message.Trim()))
+                    if (ChannelDict.ContainsKey(Contents.Trim()))
                     {
-                        ChannelDict[Message.Trim()].Members.Add(UserID);
-                        UserDict[UserID].Channels.Add(Message.Trim());
-                        return ChannelDict[Message.Trim()].Messages;
+                        if (!ChannelDict[Contents.Trim()].Members.Contains(UserID))
+                        {
+                            ChannelDict[Contents.Trim()].Members.Add(UserID);
+                        }
+                        if (!UserDict[UserID].Channels.Contains(Contents.Trim()))
+                        {
+                            UserDict[UserID].Channels.Add(Contents.Trim());
+                        }
+                        
+                        return ChannelDict[Contents.Trim()].Messages;
                     }
                     else
                     {
@@ -109,26 +130,26 @@ namespace Server_App
                     }
                 case "LVCH":
                     Console.WriteLine("Leave Channel");
-                    if (!ChannelDict.ContainsKey(Message.Trim()))
+                    if (!ChannelDict.ContainsKey(Contents.Trim()))
                     {
                         return "Channel Does Not Exist";
                     }
-                    if (UserDict[UserID].Channels.Contains(Message.Trim()))
+                    if (UserDict[UserID].Channels.Contains(Contents.Trim()))
                     {
-                        UserDict[UserID].Channels.Remove(Message.Trim());
+                        UserDict[UserID].Channels.Remove(Contents.Trim());
                     }
-                    if(ChannelDict[Message.Trim()].Members.Contains(UserID))
+                    if(ChannelDict[Contents.Trim()].Members.Contains(UserID))
                     {
-                        ChannelDict[Message.Trim()].Members.Remove(UserID);
+                        ChannelDict[Contents.Trim()].Members.Remove(UserID);
                     }
-                    return "User is no longer in channel " + Message.Trim();
+                    return "User is no longer in channel " + Contents.Trim();
                 case "CHCH":
                     Console.WriteLine("Channel History");
-                    if (ChannelDict.ContainsKey(Message.Trim()))
+                    if (ChannelDict.ContainsKey(Contents.Trim()))
                     {
-                        if (ChannelDict[Message.Trim()].Members.Contains(UserID))
+                        if (ChannelDict[Contents.Trim()].Members.Contains(UserID))
                         {
-                            return ChannelDict[Message.Trim()].Messages;
+                            return ChannelDict[Contents.Trim()].Messages;
                         }
                         else
                         {
@@ -141,12 +162,12 @@ namespace Server_App
                     }
                 case "MEMB":
                     Console.WriteLine("Member List");
-                    if (ChannelDict.ContainsKey(Message.Trim()))
+                    if (ChannelDict.ContainsKey(Contents.Trim()))
                     {
-                        if (ChannelDict[Message.Trim()].Members.Contains(UserID))
+                        if (ChannelDict[Contents.Trim()].Members.Contains(UserID))
                         {
                             string members = "";
-                            foreach(int UserInt in ChannelDict[Message.Trim()].Members)
+                            foreach(int UserInt in ChannelDict[Contents.Trim()].Members)
                             {
                                 members = members + UserDict[UserInt].Alias + ", ";
                             }
@@ -170,14 +191,14 @@ namespace Server_App
                     Console.WriteLine("Message Channel");
                     String ChatMessage;
                     String ChannelName;
-                    ChannelName = Message.Substring(0, Message.IndexOf(','));
-                    ChatMessage = Message.Substring(Message.IndexOf(',') + 1);
+                    ChannelName = Contents.Substring(0, Contents.IndexOf(','));
+                    ChatMessage = Contents.Substring(Contents.IndexOf(',') + 1);
                     if (!ChannelDict.ContainsKey(ChannelName))
                     {
                         return "Channel dosen't exist";
                     }
                     ChannelDict[ChannelName].Messages = ChannelDict[ChannelName].Messages + UserDict[UserID].Alias + ": " + ChatMessage + "\n";
-                    break;
+                    return ChannelDict[ChannelName.Trim()].Messages;
                 case "GBYE":
                     Console.WriteLine("Disconnect");
                     foreach (ChannelData Channel in ChannelDict.Values)

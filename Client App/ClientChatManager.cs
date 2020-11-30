@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Net.Sockets;
 
 namespace Client_App
 {
@@ -13,6 +14,11 @@ namespace Client_App
             UserChannels = new List<string>();
             Connected = false;
         }
+
+        ~ClientChatManager()
+        {
+            Disconnect();
+        }
         public ClientNetworkManager Network;
         private bool running;
         private string Alias;
@@ -21,27 +27,66 @@ namespace Client_App
         private bool Connected;
         private String CurrentChannel;
 
+        String Send(String Message)
+        {
+            try
+            {
+                return Network.Send(Message);
+            }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine("ArgumentNullException: {0}", e);
+                Console.WriteLine("Disconnecting From Server");
+                Alias = "";
+                UserID = 0;
+                UserChannels = new List<string>();
+                Connected = false;
+                CurrentChannel = null;
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("SocketException: {0}", e);
+                Console.WriteLine("Disconnecting From Server");
+                Alias = "";
+                UserID = 0;
+                UserChannels = new List<string>();
+                Connected = false;
+                CurrentChannel = null;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Unknown Exception: {0}", e);
+                Console.WriteLine("Disconnecting From Server");
+                Alias = "";
+                UserID = 0;
+                UserChannels = new List<string>();
+                Connected = false;
+                CurrentChannel = null;
+            }
+            return "";
+        }
+
         public static void Help()
         {
             Console.Write(
                 "Command List:\n" +
-                "Connect to server         | /Connect\n" +
-                "List rooms                | /ListRooms\n" +
-                "Connect to room           | /Join\n" +
-                "Create new room           | /Create\n" +
-                "Leave a room              | /Leave\n" +
-                "View joined rooms         | /MyRooms\n" +
-                "View a room               | /View\n" +
-                "Message Multiple rooms    | /Multi-message\n" +
-                "View room members         | /MemberList\n" +
-                "Disconnect from server    | /Disconnect\n" +
-                "Show Help (This Menu)     | /Help\n" +
-                "Close Program             | /Exit\n" +
+                "Connect to server           | /Connect\n" +
+                "List rooms                  | /ListRooms\n" +
+                "Connect to room             | /Join\n" +
+                "Create new room             | /Create\n" +
+                "Leave a room                | /Leave\n" +
+                "View joined rooms           | /MyRooms\n" +
+                "View a room                 | /View\n" +
+                "Update current channel view | /Update\n" +
+                "Message Multiple rooms      | /Multi-message\n" +
+                "View room members           | /MemberList\n" +
+                "Disconnect from server      | /Disconnect\n" +
+                "Clear the console           | /Clear\n" +
+                "Show Help (This Menu)       | /Help\n" +
+                "Close Program               | /Exit\n" +
                 "Lines entered with no command are a message to the currently viewed room\n"
                 );
         }
-
-
 
 
         public void Run()
@@ -76,7 +121,11 @@ namespace Client_App
                         case "/Create":
                             Console.Clear();
                             Console.Write("Enter the name of the new room: ");
-                            CreateRoom(Console.ReadLine().Trim());
+                            String RoomName = Console.ReadLine().Trim();
+                            if (CreateRoom(RoomName))
+                            {
+                                JoinRoom(RoomName);
+                            }
                             break;
                         case "/Leave":
                             Console.Clear();
@@ -108,6 +157,12 @@ namespace Client_App
                             break;
                         case "/Exit":
                             Exit();
+                            break;
+                        case "/Clear":
+                            Console.Clear();
+                            break;
+                        case "/Update":
+                            ViewRoom(CurrentChannel);
                             break;
                         default:
                             Console.WriteLine("Command not recognized. You can check the list of commands with \"/Help\"");
@@ -160,10 +215,10 @@ namespace Client_App
             Console.Write("\nEnter desired alias: ");
             Alias = Console.ReadLine();
             String message = "NWID" + IDString() + Alias;
-            String responce = Network.Send(message);
+            String responce = Send(message);
             try
             {
-                UserID = int.Parse((message.TrimEnd(new char[] { (char)0 })).TrimStart('0'));
+                UserID = int.Parse(responce);
             }
             catch
             {
@@ -173,6 +228,7 @@ namespace Client_App
                 return false;
             }
             Console.WriteLine("User " + Alias + " is connected to the server");
+            Connected = true;
             return true;
         }
 
@@ -181,7 +237,7 @@ namespace Client_App
             String Message;
             String Responce;
             Message = "GBYE" + IDString();
-            Responce = Network.Send(Message);
+            Responce = Send(Message);
             if(Responce != "Bye!")
             {
                 Console.WriteLine("Server Responce Mismatch");
@@ -215,7 +271,7 @@ namespace Client_App
             String Responce;
 
             Message = "CHLS" + IDString();
-            Responce = Network.Send(Message);
+            Responce = Send(Message);
             String[] Channels = Responce.Split(',');
             Console.Clear();
             Console.WriteLine("Room List:");
@@ -236,15 +292,19 @@ namespace Client_App
             String Message;
             String Responce;
             Message = "JNCH" + IDString() + RoomName;
-            Responce = Network.Send(Message);
+            Responce = Send(Message);
             if(Responce == "Channel Does Not Exist")
             {
                 Console.WriteLine("Room Does not exist");
                 return false;
             }
-            UserChannels.Add(RoomName);
+            if (!UserChannels.Contains(RoomName))
+            {
+                UserChannels.Add(RoomName);
+            }
             Console.Clear();
             Console.Write(Responce);
+            CurrentChannel = RoomName;
             return true;
         }
 
@@ -260,13 +320,13 @@ namespace Client_App
             String Responce;
 
             Message = "CRCH" + IDString() + RoomName;
-            Responce = Network.Send(Message);
+            Responce = Send(Message);
             if(Responce == "Already Exists")
             {
                 Console.WriteLine("That room name is already being used!");
                 return false;
             }
-            Console.WriteLine("Room Named " + RoomName + " created! Please join the channel!");
+            Console.WriteLine("Room Named " + RoomName + " created!");
             return true;
         }
 
@@ -285,7 +345,7 @@ namespace Client_App
             String Message;
             String Responce;
             Message = "LVCH" + IDString() + RoomName;
-            Responce = Network.Send(Message);
+            Responce = Send(Message);
             if(Responce == "Channel Does Not Exist")
             {
                 Console.WriteLine("Channel Does not Exist");
@@ -331,7 +391,7 @@ namespace Client_App
             String Message;
             String Responce;
             Message = "CHCH" + IDString() + RoomName;
-            Responce = Network.Send(Message);
+            Responce = Send(Message);
             Console.Clear();
             Console.Write(Responce);
             CurrentChannel = RoomName;
@@ -369,12 +429,12 @@ namespace Client_App
             String Message;
             String Responce;
             Message = "MEMB" + IDString() + RoomName;
-            Responce = Network.Send(Message);
+            Responce = Send(Message);
             String[] Members = Responce.Split(',');
             Console.WriteLine("The Members of room " + RoomName + " are:");
             foreach (String Member in Members)
             {
-                Console.WriteLine(Member);
+                Console.WriteLine(Member.Trim());
             }
             return true;
         }
@@ -389,7 +449,7 @@ namespace Client_App
             String Message;
             String Responce;
             Message = "MECH" + IDString() + Channel.Trim() + "," + ChatMessage;
-            Responce = Network.Send(Message);
+            Responce = Send(Message);
             Console.Clear();
             Console.Write(Responce);
             return true;
