@@ -41,7 +41,7 @@ namespace Client_App
 
                 byte[] data = Encoding.ASCII.GetBytes(Message);
                 Stream.Write(data, 0, data.Length);
-                Console.WriteLine("Send message: " + Message);
+                //Console.WriteLine("Send message: " + Message);
                 responceData = String.Empty;
 
 
@@ -55,7 +55,7 @@ namespace Client_App
 
                 //int bytes = Stream.Read(data, 0, data.Length);
                 //responceData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-                Console.WriteLine("Recived Message: " + responceData);
+                //Console.WriteLine("Recived Message: " + responceData);
 
                 Stream.Close();
                 client.Close();
